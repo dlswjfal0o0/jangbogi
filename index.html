@@ -210,7 +210,9 @@ function render(){
     const rows=p.key==='fridge'
       ? items.map(i=>renderFridgeItem(i)).join('')
       : items.map(i=>renderShopItem(p.key,i)).join('');
-    return `<div class="panel">
+      
+    // 👇 핵심 수정 포인트: <div class="panel"> 에 ${p.cls} 테마용 클래스 삽입
+    return `<div class="panel ${p.cls}">
       <div class="panel-header">
         <div class="panel-title"><div class="panel-icon ${p.cls}">${p.icon}</div>${p.label}</div>
         <span class="badge ${p.cls}">${p.badgeText}</span>
