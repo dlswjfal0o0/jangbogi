@@ -171,37 +171,43 @@ const PANELS=[
   {key:'coupang',label:'쿠팡 / 쿠팡프레시', icon:'📦',cls:'coupang',badgeText:'Coupang'},
 ];
 
-function renderFridgeItem(item){
-  return `<div class="item" data-id="${item.id}">
-    <div class="item-body">
-      <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름"
-        oninput="updateField('fridge',${item.id},'name',this.value)">
+function renderFridgeItem(item){ 
+  return `<div class="item" data-id="${item.id}"> 
+    <div class="item-body"> 
+      <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름" 
+        oninput="updateField('fridge',${item.id},'name',this.value)"> 
+    </div> 
+    <div style="display:flex; gap:4px;">
+      <button class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem()">✅</button>
+      <button class="del-btn" onclick="delItem('fridge',${item.id})">×</button> 
     </div>
-    <button class="del-btn" onclick="delItem('fridge',${item.id})">×</button>
-  </div>`;
-}
+  </div>`; 
+} 
 
-function renderShopItem(panel,item){
-  const total=(item.price||0)*(item.qty||1);
-  return `<div class="item" data-id="${item.id}">
-    <div class="item-body">
-      <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름"
-        oninput="updateField('${panel}',${item.id},'name',this.value)">
-      <div class="fields">
-        <div class="field"><span class="field-label">가격 (원)</span>
-          <input class="field-input" type="number" min="0" value="${item.price||''}" placeholder="0"
-            oninput="updateField('${panel}',${item.id},'price',this.value)"></div>
-        <div class="field"><span class="field-label">수량</span>
-          <input class="field-input" type="number" min="1" value="${item.qty||1}"
-            oninput="updateField('${panel}',${item.id},'qty',this.value)"></div>
-        <div class="field"><span class="field-label">무게/용량</span>
-          <input class="field-input" type="text" value="${esc(item.weight||'')}" placeholder="예) 500g"
-            oninput="updateField('${panel}',${item.id},'weight',this.value)"></div>
-      </div>
+function renderShopItem(panel,item){ 
+  const total=(item.price||0)*(item.qty||1); 
+  return `<div class="item" data-id="${item.id}"> 
+    <div class="item-body"> 
+      <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름" 
+        oninput="updateField('${panel}',${item.id},'name',this.value)"> 
+      <div class="fields"> 
+        <div class="field"><span class="field-label">가격 (원)</span> 
+          <input class="field-input" type="number" min="0" value="${item.price||''}" placeholder="0" 
+            oninput="updateField('${panel}',${item.id},'price',this.value)"></div> 
+        <div class="field"><span class="field-label">수량</span> 
+          <input class="field-input" type="number" min="1" value="${item.qty||1}" 
+            oninput="updateField('${panel}',${item.id},'qty',this.value)"></div> 
+        <div class="field"><span class="field-label">무게/용량</span> 
+          <input class="field-input" type="text" value="${esc(item.weight||'')}" placeholder="예) 500g" 
+            oninput="updateField('${panel}',${item.id},'weight',this.value)"></div> 
+      </div> 
+    </div> 
+    ${total>0?`<div class="item-total">${fmt(total)}원</div>`:''} 
+    <div style="display:flex; gap:4px; align-items:flex-start;">
+      <button class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem()">✅</button>
+      <button class="del-btn" onclick="delItem('${panel}',${item.id})">×</button> 
     </div>
-    <div class="item-total">${total > 0 ? fmt(total) + '원' : ''}</div>
-    <button class="del-btn" onclick="delItem('${panel}',${item.id})">×</button>
-  </div>`;
+  </div>`; 
 }
 
 function render(){
@@ -212,6 +218,7 @@ function render(){
       ? items.map(i=>renderFridgeItem(i)).join('')
       : items.map(i=>renderShopItem(p.key,i)).join('');
       
+    // 👇 핵심 수정 포인트: <div class="panel"> 에 ${p.cls} 테마용 클래스 삽입
     return `<div class="panel ${p.cls}">
       <div class="panel-header">
         <div class="panel-title"><div class="panel-icon ${p.cls}">${p.icon}</div>${p.label}</div>
@@ -255,45 +262,41 @@ function renderSummary(){
     </div>`;
 }
 
-// 👇 수정 3: render() 호출부를 완전히 삭제하고, 해당 항목의 요소만 직접 업데이트
-window.updateField=(panel,id,field,val)=>{
-  const item=(state[panel]||[]).find(i=>i.id===id);
-  if(!item) return;
-  if(field==='price'||field==='qty') item[field]=parseFloat(val)||0;
-  else item[field]=val;
+window.updateField=(panel,id,field,val)=>{ 
+  const item=(state[panel]||[]).find(i=>i.id===id); 
+  if(!item) return; 
+  if(field==='price'||field==='qty') item[field]=parseFloat(val)||0; 
+  else item[field]=val; 
+  renderSummary(); scheduleSave(); 
   
-  renderSummary(); 
-  scheduleSave();
+  if(field==='price'||field==='qty'){ 
+    const el=document.querySelector(`[data-id="${id}"] .item-total`); 
+    const total=(item.price||0)*(item.qty||1); 
+    // else render(); 부분 삭제함 (포커스 튕김 방지)
+    if(el) el.textContent=fmt(total)+'원'; 
+  } 
+}; 
 
-  // DOM을 통째로 갈아엎는 대신 필요한 부분(합계 텍스트)만 바꿔치기
-  if(field==='price'||field==='qty'){
-    const el=document.querySelector(`[data-id="${id}"] .item-total`);
-    const total=(item.price||0)*(item.qty||1);
-    if(el) {
-      el.textContent = total > 0 ? fmt(total) + '원' : ''; 
-    }
-  }
+// 체크(✅) 버튼을 누르면 실행되는 함수
+window.confirmItem = () => {
+  // 모바일 키보드를 내림 (입력 완료 효과)
+  if(document.activeElement) document.activeElement.blur();
+  showToast('✅ 안전하게 등록되었습니다');
 };
-
 window.delItem=(panel,id)=>{ state[panel]=(state[panel]||[]).filter(i=>i.id!==id); render(); scheduleSave(); };
-window.addItem = panel => {
-  // 👇 수정됨: nextId 대신 현재 시간(밀리초)을 사용하여 절대 겹치지 않는 고유 ID 생성
+window.addItem=panel=>{ 
+  // nextId 대신 현재 시간을 써서 완벽한 고유 ID 생성
   const id = Date.now(); 
   
-  if(!state[panel]) state[panel]=[];
-  if(panel==='fridge') state.fridge.push({id,name:'새 품목'});
-  else state[panel].push({id,name:'새 품목',price:0,qty:1,weight:''});
+  if(!state[panel]) state[panel]=[]; 
+  if(panel==='fridge') state.fridge.push({id,name:''}); // '새 품목' 글씨는 바로 입력할 수 있게 비워둠
+  else state[panel].push({id,name:'',price:0,qty:1,weight:''}); 
   
-  render(); 
-  scheduleSave();
-  
-  setTimeout(()=>{ 
-    const inp=document.querySelectorAll(`[data-id="${id}"] .name-input`); 
-    if(inp.length){inp[0].focus();inp[0].select();} 
-  }, 60);
+  render(); scheduleSave(); 
+  setTimeout(()=>{ const inp=document.querySelectorAll(`[data-id="${id}"] .name-input`); if(inp.length){inp[0].focus();inp[0].select();} },60); 
 };
 
-// 확장 프로그램 동기화 브릿지
+// 👇 추가된 부분: 확장 프로그램 동기화 브릿지 ──────────────────────────
 window.__syncFromExtension = (products) => {
   if (!state || !currentUser) { showToast('로그인 후 동기화할 수 있어요'); return; }
   let addedCount = 0;
@@ -303,6 +306,7 @@ window.__syncFromExtension = (products) => {
     const panel = p.source === 'kurly' ? 'kurly' : 'coupang';
     if (!state[panel]) state[panel] = [];
 
+    // 같은 이름 항목이 있으면 가격·무게 업데이트, 없으면 추가
     const existing = state[panel].find(i => i.name === p.name);
     if (existing) {
       if (p.price)  existing.price  = p.price;
@@ -310,9 +314,7 @@ window.__syncFromExtension = (products) => {
       if (p.qty)    existing.qty    = p.qty;
       updatedCount++;
     } else {
-      // 👇 수정됨: 동시에 여러 개가 추가될 때를 대비해 랜덤값을 약간 더해 완벽한 고유 ID 생성
-      const id = Date.now() + Math.floor(Math.random() * 10000); 
-      
+      const id = nextId[panel]++;
       state[panel].push({ id, name: p.name, price: p.price || 0, qty: p.qty || 1, weight: p.weight || '' });
       addedCount++;
     }
@@ -322,7 +324,7 @@ window.__syncFromExtension = (products) => {
   scheduleSave();
 
   const msg = [
-    addedCount   > 0 ? `${addedCount}개 추가됨`      : '',
+    addedCount   > 0 ? `${addedCount}개 추가됨`       : '',
     updatedCount > 0 ? `${updatedCount}개 가격 갱신됨` : '',
   ].filter(Boolean).join(' · ');
   showToast('📦 ' + msg);
@@ -334,6 +336,7 @@ window.addEventListener('message', (e) => {
     window.__syncFromExtension(e.data.products);
   }
 });
+// ─────────────────────────────────────────────────────────
 
 window.copyText=()=>{
   if(!state) return;
@@ -350,4 +353,4 @@ window.copyText=()=>{
 };
 </script>
 </body>
-</html>
+</html> 
