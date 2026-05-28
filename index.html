@@ -172,13 +172,16 @@ const PANELS=[
 ];
 
 function renderFridgeItem(item){ 
+  // 데이터에 체크(confirmed) 기록이 있으면 버튼을 숨김 처리
+  const checkStyle = item.confirmed ? 'display:none;' : '';
+  
   return `<div class="item" data-id="${item.id}"> 
     <div class="item-body"> 
       <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름" 
         oninput="updateField('fridge',${item.id},'name',this.value)"> 
     </div> 
     <div style="display:flex; gap:4px;">
-      <button id="check-btn-${item.id}" class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem(${item.id})">✅</button>
+      <button id="check-btn-fridge-${item.id}" class="del-btn" style="background:#e8f5e9; color:#2e7d32; ${checkStyle}" onclick="confirmItem('fridge', ${item.id})">✅</button>
       <button class="del-btn" onclick="delItem('fridge',${item.id})">×</button> 
     </div>
   </div>`; 
@@ -186,6 +189,8 @@ function renderFridgeItem(item){
 
 function renderShopItem(panel,item){ 
   const total=(item.price||0)*(item.qty||1); 
+  const checkStyle = item.confirmed ? 'display:none;' : '';
+
   return `<div class="item" data-id="${item.id}"> 
     <div class="item-body"> 
       <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름" 
@@ -204,7 +209,7 @@ function renderShopItem(panel,item){
     </div> 
     ${total>0?`<div class="item-total">${fmt(total)}원</div>`:''} 
     <div style="display:flex; gap:4px; align-items:flex-start;">
-      <button id="check-btn-${item.id}" class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem(${item.id})">✅</button>
+      <button id="check-btn-${panel}-${item.id}" class="del-btn" style="background:#e8f5e9; color:#2e7d32; ${checkStyle}" onclick="confirmItem('${panel}', ${item.id})">✅</button>
       <button class="del-btn" onclick="delItem('${panel}',${item.id})">×</button> 
     </div>
   </div>`; 
@@ -267,6 +272,10 @@ window.updateField=(panel,id,field,val)=>{
   if(!item) return; 
   if(field==='price'||field==='qty') item[field]=parseFloat(val)||0; 
   else item[field]=val; 
+  
+  // 👇 글자가 수정되면 체크(확정) 상태를 해제함
+  item.confirmed = false;
+
   renderSummary(); scheduleSave(); 
   
   if(field==='price'||field==='qty'){ 
@@ -275,22 +284,28 @@ window.updateField=(panel,id,field,val)=>{
     if(el) el.textContent=fmt(total)+'원'; 
   } 
 
-  // 👇 추가된 부분: 글자를 수정하면 해당 항목의 체크 버튼을 다시 보여줌
-  const checkBtn = document.getElementById(`check-btn-${id}`);
-  if(checkBtn) checkBtn.style.display = 'block';
-}; 
+  // 👇 패널 이름이 포함된 ID로 숨겨졌던 버튼을 다시 보여줌
+  const checkBtn = document.getElementById(`check-btn-${panel}-${id}`);
+  if(checkBtn) checkBtn.style.display = ''; // 기존 none을 지워 나타나게 함
+};
 
-// 👇 파라미터로 id를 받도록 수정됨
-window.confirmItem = (id) => {
-  // 1. 모바일 키보드를 내림
+// 👇 패널 정보도 함께 받도록 변경
+window.confirmItem = (panel, id) => {
+  // 1. 모바일 키보드 내림
   if(document.activeElement) document.activeElement.blur();
   
-  // 2. 누른 체크 버튼을 화면에서 숨김
-  const checkBtn = document.getElementById(`check-btn-${id}`);
+  // 2. 해당 아이템 데이터에 '확정(confirmed)' 처리하고 서버에 저장
+  const item = (state[panel] || []).find(i => i.id === id);
+  if (item) {
+    item.confirmed = true;
+    scheduleSave();
+  }
+
+  // 3. 누른 버튼 숨김 (패널 이름 포함된 ID로 정확히 찾음)
+  const checkBtn = document.getElementById(`check-btn-${panel}-${id}`);
   if(checkBtn) checkBtn.style.display = 'none';
 
-  // 3. 완료 메시지 띄움
-  showToast('✅ 안전하게 등록되었습니다');
+  showToast('✅ 등록이 완료되었습니다');
 };
 window.delItem=(panel,id)=>{ state[panel]=(state[panel]||[]).filter(i=>i.id!==id); render(); scheduleSave(); };
 window.addItem=panel=>{ 
