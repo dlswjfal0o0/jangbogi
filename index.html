@@ -276,13 +276,21 @@ window.updateField=(panel,id,field,val)=>{
 };
 
 window.delItem=(panel,id)=>{ state[panel]=(state[panel]||[]).filter(i=>i.id!==id); render(); scheduleSave(); };
-window.addItem=panel=>{
-  const id=nextId[panel]++;
+window.addItem = panel => {
+  // 👇 수정됨: nextId 대신 현재 시간(밀리초)을 사용하여 절대 겹치지 않는 고유 ID 생성
+  const id = Date.now(); 
+  
   if(!state[panel]) state[panel]=[];
   if(panel==='fridge') state.fridge.push({id,name:'새 품목'});
   else state[panel].push({id,name:'새 품목',price:0,qty:1,weight:''});
-  render(); scheduleSave();
-  setTimeout(()=>{ const inp=document.querySelectorAll(`[data-id="${id}"] .name-input`); if(inp.length){inp[0].focus();inp[0].select();} },60);
+  
+  render(); 
+  scheduleSave();
+  
+  setTimeout(()=>{ 
+    const inp=document.querySelectorAll(`[data-id="${id}"] .name-input`); 
+    if(inp.length){inp[0].focus();inp[0].select();} 
+  }, 60);
 };
 
 // 확장 프로그램 동기화 브릿지
@@ -302,7 +310,9 @@ window.__syncFromExtension = (products) => {
       if (p.qty)    existing.qty    = p.qty;
       updatedCount++;
     } else {
-      const id = nextId[panel]++;
+      // 👇 수정됨: 동시에 여러 개가 추가될 때를 대비해 랜덤값을 약간 더해 완벽한 고유 ID 생성
+      const id = Date.now() + Math.floor(Math.random() * 10000); 
+      
       state[panel].push({ id, name: p.name, price: p.price || 0, qty: p.qty || 1, weight: p.weight || '' });
       addedCount++;
     }
