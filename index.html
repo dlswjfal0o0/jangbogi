@@ -178,7 +178,7 @@ function renderFridgeItem(item){
         oninput="updateField('fridge',${item.id},'name',this.value)"> 
     </div> 
     <div style="display:flex; gap:4px;">
-      <button class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem()">✅</button>
+      <button id="check-btn-${item.id}" class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem(${item.id})">✅</button>
       <button class="del-btn" onclick="delItem('fridge',${item.id})">×</button> 
     </div>
   </div>`; 
@@ -204,7 +204,7 @@ function renderShopItem(panel,item){
     </div> 
     ${total>0?`<div class="item-total">${fmt(total)}원</div>`:''} 
     <div style="display:flex; gap:4px; align-items:flex-start;">
-      <button class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem()">✅</button>
+      <button id="check-btn-${item.id}" class="del-btn" style="background:#e8f5e9; color:#2e7d32;" onclick="confirmItem(${item.id})">✅</button>
       <button class="del-btn" onclick="delItem('${panel}',${item.id})">×</button> 
     </div>
   </div>`; 
@@ -272,15 +272,24 @@ window.updateField=(panel,id,field,val)=>{
   if(field==='price'||field==='qty'){ 
     const el=document.querySelector(`[data-id="${id}"] .item-total`); 
     const total=(item.price||0)*(item.qty||1); 
-    // else render(); 부분 삭제함 (포커스 튕김 방지)
     if(el) el.textContent=fmt(total)+'원'; 
   } 
+
+  // 👇 추가된 부분: 글자를 수정하면 해당 항목의 체크 버튼을 다시 보여줌
+  const checkBtn = document.getElementById(`check-btn-${id}`);
+  if(checkBtn) checkBtn.style.display = 'block';
 }; 
 
-// 체크(✅) 버튼을 누르면 실행되는 함수
-window.confirmItem = () => {
-  // 모바일 키보드를 내림 (입력 완료 효과)
+// 👇 파라미터로 id를 받도록 수정됨
+window.confirmItem = (id) => {
+  // 1. 모바일 키보드를 내림
   if(document.activeElement) document.activeElement.blur();
+  
+  // 2. 누른 체크 버튼을 화면에서 숨김
+  const checkBtn = document.getElementById(`check-btn-${id}`);
+  if(checkBtn) checkBtn.style.display = 'none';
+
+  // 3. 완료 메시지 띄움
   showToast('✅ 안전하게 등록되었습니다');
 };
 window.delItem=(panel,id)=>{ state[panel]=(state[panel]||[]).filter(i=>i.id!==id); render(); scheduleSave(); };
