@@ -103,7 +103,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .main{padding:2rem;max-width:1400px;margin:0 auto;}
 .summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:2rem;}
 
-/* 🧊 상단 요약 카드 디자인 (테마 적용) */
+/* 🧊 상단 요약 카드 디자인 */
 .summary-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -112,28 +112,31 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   position: relative;
   overflow: hidden;
 }
-.summary-card.fridge {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
-  border-color: var(--fridge-border);
-}
+.summary-card.fridge { background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%); border-color: var(--fridge-border); }
 .summary-card.kurly {
-  background-color: #ffffff;
-  border-color: var(--kurly-border);
+  background-color: #ffffff; border-color: var(--kurly-border);
   background-image: radial-gradient(var(--kurly-bg) 10%, transparent 11%), radial-gradient(var(--kurly-bg) 10%, transparent 11%);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
+  background-size: 20px 20px; background-position: 0 0, 10px 10px;
 }
 .summary-card.coupang {
-  background-color: #ffffff;
-  border-color: var(--coupang-border);
+  background-color: #ffffff; border-color: var(--coupang-border);
   background-image: radial-gradient(var(--coupang-bg) 10%, transparent 11%), radial-gradient(var(--coupang-bg) 10%, transparent 11%);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
+  background-size: 20px 20px; background-position: 0 0, 10px 10px;
 }
+
+/* 새로 추가되는 쇼핑몰 요약 카드 패턴 */
+.summary-card.custom-shop {
+  background-color: #ffffff;
+  background-image: radial-gradient(var(--shop-bg) 10%, transparent 11%), radial-gradient(var(--shop-bg) 10%, transparent 11%);
+  background-size: 20px 20px; background-position: 0 0, 10px 10px;
+}
+
 .summary-card::before {content:'';position:absolute;top:0;left:0;right:0;height:4px;}
 .summary-card.fridge::before {background:var(--fridge-accent);}
 .summary-card.kurly::before {background:var(--kurly-accent);}
 .summary-card.coupang::before {background:var(--coupang-accent);}
+.summary-card[style*="--shop-accent"]::before { background: var(--shop-accent) !important; }
+
 .summary-label {font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;}
 .summary-value {font-size:28px;font-weight:700;color:var(--text);letter-spacing:-0.5px;font-family:'DM Mono',monospace;}
 .summary-sub {font-size:12px;color:var(--text3);margin-top:6px;}
@@ -141,38 +144,39 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start;}
 
-/* 🧺 패널 배경 디자인 (테마 적용) */
+/* 🧺 패널 배경 디자인 */
 .panel {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
-
-/* 🧊 냉장고 디자인 배경 */
 .panel.fridge {
   background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%);
   border: 2px solid var(--fridge-border);
   box-shadow: inset 0 0 15px rgba(255,255,255,0.8), var(--shadow);
 }
-/* 🛍 마켓컬리 장바구니 패턴 (보라색 계열) */
 .panel.kurly {
-  background-color: #FFFFFF;
-  border: 1px solid var(--kurly-border);
+  background-color: #FFFFFF; border: 1px solid var(--kurly-border);
   background-image: 
     linear-gradient(45deg, var(--kurly-bg) 25%, transparent 25%, transparent 75%, var(--kurly-bg) 75%, var(--kurly-bg)),
     linear-gradient(45deg, var(--kurly-bg) 25%, transparent 25%, transparent 75%, var(--kurly-bg) 75%, var(--kurly-bg));
-  background-size: 16px 16px;
-  background-position: 0 0, 8px 8px;
+  background-size: 16px 16px; background-position: 0 0, 8px 8px;
 }
-/* 📦 쿠팡프레시 장바구니 패턴 (연두색 계열) */
 .panel.coupang {
-  background-color: #FFFFFF;
-  border: 1px solid var(--coupang-border);
+  background-color: #FFFFFF; border: 1px solid var(--coupang-border);
   background-image: 
     linear-gradient(45deg, var(--coupang-bg) 25%, transparent 25%, transparent 75%, var(--coupang-bg) 75%, var(--coupang-bg)),
     linear-gradient(45deg, var(--coupang-bg) 25%, transparent 25%, transparent 75%, var(--coupang-bg) 75%, var(--coupang-bg));
-  background-size: 16px 16px;
-  background-position: 0 0, 8px 8px;
+  background-size: 16px 16px; background-position: 0 0, 8px 8px;
+}
+
+/* 새로 추가되는 쇼핑몰 패널 패턴 */
+.panel.custom-shop {
+  background-color: #FFFFFF;
+  background-image: 
+    linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg)),
+    linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg));
+  background-size: 16px 16px; background-position: 0 0, 8px 8px;
 }
 
 .panel-header {padding:16px 20px;background:rgba(255,255,255,0.8);border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(4px);}
@@ -187,6 +191,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .badge.coupang {background:var(--coupang-bg);color:var(--coupang-text);border:1px solid var(--coupang-border);}
 
 .panel-body {padding:12px;}
+
+/* 패널 삭제 버튼 */
+.panel-del-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; color: var(--text3,#A09D97);
+  padding: 3px 5px; border-radius: 4px;
+  transition: all 0.15s; line-height: 1;
+}
+.panel-del-btn:hover { color: #E03A3A; background: #FEE8E8; }
 
 .item {
   background: rgba(255, 255, 255, 0.9);
@@ -213,20 +226,62 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .field-input {font-family:'DM Mono',monospace;font-size:13px;color:var(--text);background:var(--surface2);border:1px solid transparent;border-radius:var(--radius-sm);padding:6px 8px;width:100%;transition:all 0.2s;}
 .field-input:focus {outline:none;border-color:var(--border2);background:var(--surface);box-shadow:0 0 0 2px rgba(0,0,0,0.05);}
 
+/* 아이템 가격 배지 및 항목 추가 버튼 */
 .item-total {font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--kurly-accent);background:var(--kurly-bg);border-radius:var(--radius-sm);padding:4px 10px;white-space:nowrap;flex-shrink:0;align-self:flex-end;margin-bottom:4px;}
 .panel.coupang .item-total {color:var(--coupang-text);background:var(--coupang-bg);}
+.panel.custom-shop .item-total {color:var(--shop-text);background:var(--shop-bg);}
 .panel.fridge .item-total {display:none;}
 
 .del-btn {background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all 0.2s;flex-shrink:0;margin-top:2px;}
 .del-btn:hover {color:var(--danger);background:#FEE8E8;}
 
 .empty-state {text-align:center;padding:32px 0;color:var(--text3);font-size:14px;font-weight:500;}
+
 .add-btn {width:100%;margin-top:12px;padding:12px;background:rgba(255,255,255,0.7);border:1px dashed var(--border2);border-radius:8px;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;}
 .add-btn:hover {border-color:var(--text);color:var(--text);background:var(--surface);}
+.panel.custom-shop .add-btn { background: rgba(255,255,255,0.8); border-color: var(--shop-border); color: var(--shop-text); }
+.panel.custom-shop .add-btn:hover { border-color: var(--shop-text); background: var(--shop-bg); }
 
 .toast {position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,25,22,0.9);color:white;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);z-index:999;pointer-events:none;box-shadow:var(--shadow-md);}
 .toast.show {opacity:1;transform:translateX(-50%) translateY(0);}
 
+
+/* ─────────────── 쇼핑몰 추가 모달 디자인 ─────────────── */
+#modalOverlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; backdrop-filter: blur(2px);
+}
+.modal-card {
+  background: var(--surface, #fff); border: 1px solid var(--border, #E2DFD6);
+  border-radius: 14px; padding: 24px; width: 340px; max-width: 92vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12); animation: fadeUp 0.2s ease;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text,#1A1916); margin-bottom: 16px; }
+.modal-body { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.modal-field { display: flex; flex-direction: column; gap: 4px; }
+.modal-label { font-size: 12px; font-weight: 600; color: var(--text2,#6B6760); }
+.modal-input {
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: var(--text,#1A1916);
+  background: var(--surface2,#F0EEE8); border: 1px solid var(--border,#E2DFD6);
+  border-radius: 6px; padding: 8px 10px; outline: none; transition: border-color 0.15s;
+}
+.modal-input:focus { border-color: var(--border2,#CBC7BC); background: #fff; }
+.modal-preset-label { font-size: 11px; font-weight: 600; color: var(--text3,#A09D97); text-transform: uppercase; letter-spacing: 0.4px; }
+.modal-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.preset-chip {
+  font-size: 12px; padding: 5px 10px; border-radius: 20px;
+  border: 1px solid var(--border2,#CBC7BC); background: var(--surface,#fff);
+  color: var(--text2,#6B6760); cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 4px;
+}
+.preset-chip:hover { background: var(--surface2,#F0EEE8); color: var(--text,#1A1916); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn-primary { background: var(--text,#1A1916) !important; color: white !important; border-color: var(--text,#1A1916) !important; }
+.btn-primary:hover { background: #333 !important; }
+
+
+/* ─────────────── 애니메이션 및 반응형 ─────────────── */
 @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
