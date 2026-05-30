@@ -39,6 +39,7 @@
         <div class="user-avatar-fallback" id="userFallback" style="display:none"></div>
         <span class="user-name" id="userName"></span>
       </div>
+      <button class="btn" onclick="openAddShopModal()">＋ 쇼핑몰 추가</button>
       <button class="btn" onclick="copyText()">📋 복사</button>
       <button class="btn btn-danger" onclick="doSignOut()">로그아웃</button>
     </div>
@@ -49,7 +50,95 @@
   </main>
 </div>
 
+<div id="modalOverlay" style="display:none" onclick="closeAddShopModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-title">쇼핑몰 추가</div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-label">쇼핑몰 이름 <span style="color:#E03A3A">*</span></label>
+        <input class="modal-input" id="newShopName" type="text" placeholder="예) 오아시스마켓">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">아이콘 (이모지)</label>
+        <input class="modal-input" id="newShopIcon" type="text" placeholder="예) 🛒" maxlength="4">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">배지 텍스트</label>
+        <input class="modal-input" id="newShopBadge" type="text" placeholder="예) Oasis" maxlength="10">
+      </div>
+      <div class="modal-preset-label">자주 쓰는 쇼핑몰</div>
+      <div class="modal-presets" id="presetList"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAddShopModal()">취소</button>
+      <button class="btn btn-primary" onclick="addShop()">추가하기</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
+<style>
+  /* 모달 */
+  #modalOverlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500;
+    backdrop-filter: blur(2px);
+  }
+  .modal-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #E2DFD6);
+    border-radius: 14px;
+    padding: 24px;
+    width: 340px;
+    max-width: 92vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    animation: fadeUp 0.2s ease;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--text,#1A1916); margin-bottom: 16px; }
+  .modal-body { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .modal-field { display: flex; flex-direction: column; gap: 4px; }
+  .modal-label { font-size: 12px; font-weight: 600; color: var(--text2,#6B6760); }
+  .modal-input {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px; color: var(--text,#1A1916);
+    background: var(--surface2,#F0EEE8);
+    border: 1px solid var(--border,#E2DFD6);
+    border-radius: 6px; padding: 8px 10px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .modal-input:focus { border-color: var(--border2,#CBC7BC); background: #fff; }
+  .modal-preset-label { font-size: 11px; font-weight: 600; color: var(--text3,#A09D97); text-transform: uppercase; letter-spacing: 0.4px; }
+  .modal-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .preset-chip {
+    font-size: 12px; padding: 5px 10px; border-radius: 20px;
+    border: 1px solid var(--border2,#CBC7BC);
+    background: var(--surface,#fff);
+    color: var(--text2,#6B6760);
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .preset-chip:hover { background: var(--surface2,#F0EEE8); color: var(--text,#1A1916); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-primary { background: var(--text,#1A1916) !important; color: white !important; border-color: var(--text,#1A1916) !important; }
+  .btn-primary:hover { background: #333 !important; }
+
+  /* 커스텀 쇼핑몰 summary-card 상단 accent 선 */
+  .summary-card[style*="--shop-accent"]::before { background: var(--shop-accent) !important; }
+
+  /* 패널 삭제 버튼 */
+  .panel-del-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 13px; color: var(--text3,#A09D97);
+    padding: 3px 5px; border-radius: 4px;
+    transition: all 0.15s; line-height: 1;
+  }
+  .panel-del-btn:hover { color: #E03A3A; background: #FEE8E8; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+</style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -72,11 +161,27 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
+// ── 프리셋 쇼핑몰 목록 ───────────────────────────────────
+const SHOP_PRESETS = [
+  { name:'마켓컬리',   icon:'🛍', badge:'Kurly',    key:'kurly'   },
+  { name:'쿠팡',       icon:'📦', badge:'Coupang',  key:'coupang' },
+  { name:'오아시스',   icon:'🌿', badge:'Oasis',    key:'oasis'   },
+  { name:'SSG닷컴',    icon:'🛒', badge:'SSG',      key:'ssg'     },
+  { name:'홈플러스',   icon:'🏪', badge:'Homeplus', key:'homeplus'},
+  { name:'이마트몰',   icon:'🟡', badge:'emart',    key:'emart'   },
+  { name:'GS프레시',   icon:'🟢', badge:'GS',       key:'gs'      },
+  { name:'롯데마트',   icon:'🔴', badge:'Lotte',    key:'lotte'   },
+];
+
+// ── 기본 데이터 구조 ─────────────────────────────────────
 const DEFAULT_DATA = {
   fridge:  [{id:1,name:'계란 (30구)'},{id:2,name:'우유 1L'},{id:3,name:'두부 300g'}],
   kurly:   [{id:1,name:'유기농 계란 (15구)',price:6800,qty:1,weight:''},{id:2,name:'서울우유 1L',price:2400,qty:2,weight:'1000g'}],
   coupang: [{id:1,name:'동물복지 계란 (30구)',price:11900,qty:1,weight:'1.8kg'},{id:2,name:'매일 우유 1L',price:2100,qty:2,weight:'1000g'}],
-  _shops:  [{key:'kurly',name:'마켓컬리',icon:'🛍'},{key:'coupang',name:'쿠팡 / 쿠팡프레시',icon:'📦'}]
+  _shops: [
+    { key:'kurly',   name:'마켓컬리',          icon:'🛍', badge:'Kurly'   },
+    { key:'coupang', name:'쿠팡 / 쿠팡프레시', icon:'📦', badge:'Coupang' },
+  ]
 };
 
 let state = null;
@@ -85,6 +190,7 @@ let saveTimer = null;
 
 const fmt = n => Number(n||0).toLocaleString('ko-KR');
 const esc = s => String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const slugify = s => s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_가-힣]/g,'').toLowerCase() + '_' + Date.now();
 
 function showToast(msg){
   const t=document.getElementById('toast');
@@ -159,50 +265,55 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
+// ── 렌더 ─────────────────────────────────────────────────
 function renderFridgeItem(item){
+  const checkStyle = item.confirmed ? 'display:none;' : '';
   return `<div class="item" data-id="${item.id}">
     <div class="item-body">
       <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름"
-        onchange="updateField('fridge',${item.id},'name',this.value)">
+        oninput="updateField('fridge',${item.id},'name',this.value)">
     </div>
-    <button class="del-btn" onclick="delItem('fridge',${item.id})">×</button>
+    <div style="display:flex;gap:4px;">
+      <button id="check-btn-fridge-${item.id}" class="del-btn" style="background:#e8f5e9;color:#2e7d32;${checkStyle}" onclick="confirmItem('fridge',${item.id})">✅</button>
+      <button class="del-btn" onclick="delItem('fridge',${item.id})">×</button>
+    </div>
   </div>`;
 }
+
 function renderShopItem(panel,item){
   const total=(item.price||0)*(item.qty||1);
+  const checkStyle = item.confirmed ? 'display:none;' : '';
   return `<div class="item" data-id="${item.id}">
     <div class="item-body">
       <input class="name-input" value="${esc(item.name)}" placeholder="품목 이름"
-        onchange="updateField('${panel}',${item.id},'name',this.value)">
+        oninput="updateField('${panel}',${item.id},'name',this.value)">
       <div class="fields">
         <div class="field"><span class="field-label">가격 (원)</span>
           <input class="field-input" type="number" min="0" value="${item.price||''}" placeholder="0"
-            onchange="updateField('${panel}',${item.id},'price',this.value)"></div>
+            oninput="updateField('${panel}',${item.id},'price',this.value)"></div>
         <div class="field"><span class="field-label">수량</span>
           <input class="field-input" type="number" min="1" value="${item.qty||1}"
-            onchange="updateField('${panel}',${item.id},'qty',this.value)"></div>
+            oninput="updateField('${panel}',${item.id},'qty',this.value)"></div>
         <div class="field"><span class="field-label">무게/용량</span>
           <input class="field-input" type="text" value="${esc(item.weight||'')}" placeholder="예) 500g"
-            onchange="updateField('${panel}',${item.id},'weight',this.value)"></div>
+            oninput="updateField('${panel}',${item.id},'weight',this.value)"></div>
       </div>
     </div>
     ${total>0?`<div class="item-total">${fmt(total)}원</div>`:''}
-    <button class="del-btn" onclick="delItem('${panel}',${item.id})">×</button>
+    <div style="display:flex;gap:4px;align-items:flex-start;">
+      <button id="check-btn-${panel}-${item.id}" class="del-btn" style="background:#e8f5e9;color:#2e7d32;${checkStyle}" onclick="confirmItem('${panel}',${item.id})">✅</button>
+      <button class="del-btn" onclick="delItem('${panel}',${item.id})">×</button>
+    </div>
   </div>`;
 }
 
-// ✨ 새로운 쇼핑몰이 추가될 때 자동으로 고유한 색상을 만들어주는 함수
-function getShopColors(key) {
-  // 기존 쇼핑몰은 지정된 색상 사용
-  if (key === 'kurly') return { bg: '#F4F1FA', border: '#D9CFF0', text: '#4B2A9B', accent: '#5F0080' };
-  if (key === 'coupang') return { bg: '#F1F8E9', border: '#C5E1A5', text: '#33691E', accent: '#7CB342' };
-  if (key === 'fridge') return { bg: '#E2E8F0', border: '#CBD5E1', text: '#334155', accent: '#64748B' };
+const FIXED_CLASSES = { kurly: 'kurly', coupang: 'coupang' };
 
-  // 새로운 쇼핑몰은 이름을 기반으로 겹치지 않는 파스텔톤 색상을 무작위 생성
+// ✨ [방법 1] 글자를 기반으로 겹치지 않는 파스텔톤 색상을 무작위 생성하는 함수
+function getShopColor(key) {
   let hash = 0;
   for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
-  const h = Math.abs(hash % 360); // 0 ~ 360도 색상환
-  
+  const h = Math.abs(hash % 360);
   return {
     bg: `hsl(${h}, 40%, 96%)`,
     border: `hsl(${h}, 45%, 85%)`,
@@ -214,46 +325,79 @@ function getShopColors(key) {
 function render(){
   if(!state) return;
   const shops = state._shops || [];
-  
-  // 1. 쇼핑몰 개수에 맞춰 하단 grid 열(Column) 개수를 오른쪽으로 자동 확장
+
+  // ✨ 가로로 자동 확장되도록 그리드 설정
   const gridEl = document.getElementById('mainGrid');
   if (gridEl) {
     gridEl.style.gridTemplateColumns = `repeat(${shops.length + 1}, minmax(0, 1fr))`;
   }
 
-  // 냉장고 패널 그리기
-  const fridgeItems = state.fridge || [];
-  const fridgeRows = fridgeItems.map(i => renderFridgeItem(i)).join('');
-  let html = `<div class="panel fridge">
+  // 냉장고 패널
+  const fridgeItems = (state.fridge||[]).map(i=>renderFridgeItem(i)).join('');
+  const fridgePanel = `<div class="panel fridge">
     <div class="panel-header">
       <div class="panel-title"><div class="panel-icon fridge">🧊</div>냉장고 재고</div>
       <span class="badge fridge">재고</span>
     </div>
     <div class="panel-body">
-      ${fridgeRows||'<div class="empty-state">항목이 없어요</div>'}
+      ${fridgeItems||'<div class="empty-state">항목이 없어요</div>'}
       <button class="add-btn" onclick="addItem('fridge')">+ 항목 추가</button>
     </div>
   </div>`;
 
-  // 등록된 쇼핑몰 패널 순서대로 그리기 (자동 색상 반영)
-  shops.forEach(s => {
-    const items = state[s.key] || [];
-    const rows = items.map(i => renderShopItem(s.key, i)).join('');
-    const c = getShopColors(s.key); // 자동 색상 가져오기
-    
-    html += `<div class="panel ${s.key}" style="border-color: ${c.border}; background-color: ${c.bg};">
-      <div class="panel-header" style="background: rgba(255,255,255,0.6); border-bottom: 1px solid ${c.border};">
-        <div class="panel-title"><div class="panel-icon" style="background: ${c.bg};">${s.icon||'🛍'}</div>${s.name}</div>
-        <span class="badge" style="background: ${c.bg}; color: ${c.accent}; border: 1px solid ${c.border};">${s.key.toUpperCase()}</span>
-      </div>
-      <div class="panel-body">
-        ${rows||'<div class="empty-state">항목이 없어요</div>'}
-        <button class="add-btn" onclick="addItem('${s.key}')" style="border-color: ${c.border}; color: ${c.text};">+ 항목 추가</button>
-      </div>
-    </div>`;
+  // 쇼핑몰 패널들
+  const shopPanels = shops.map((shop) => {
+    const items = (state[shop.key]||[]).map(i=>renderShopItem(shop.key,i)).join('');
+    const fixedCls = FIXED_CLASSES[shop.key];
+
+    if (fixedCls) {
+      // 컬리·쿠팡: 기존 CSS 클래스 유지
+      return `<div class="panel ${fixedCls}">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-icon ${fixedCls}">${shop.icon}</div>
+            ${esc(shop.name)}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge ${fixedCls}">${esc(shop.badge)}</span>
+            <button class="panel-del-btn" onclick="removeShop('${shop.key}')" title="쇼핑몰 삭제">🗑</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          ${items||'<div class="empty-state">항목이 없어요</div>'}
+          <button class="add-btn" onclick="addItem('${shop.key}')">+ 항목 추가</button>
+        </div>
+      </div>`;
+    } else {
+      // 커스텀 쇼핑몰: CSS 변수와 [방법 1] 색상 자동 주입
+      const c = getShopColor(shop.key);
+      return `<div class="panel" style="--shop-bg:${c.bg};--shop-border:${c.border};--shop-text:${c.text};--shop-accent:${c.accent}; border-color:var(--shop-border); background-color:var(--shop-bg);">
+        <div class="panel-header" style="background: rgba(255,255,255,0.6); border-bottom: 1px solid var(--shop-border);">
+          <div class="panel-title">
+            <div class="panel-icon" style="background:var(--shop-bg)">${shop.icon}</div>
+            ${esc(shop.name)}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge" style="background:var(--shop-bg);color:var(--shop-accent);border:1px solid var(--shop-border)">${esc(shop.badge)}</span>
+            <button class="panel-del-btn" onclick="removeShop('${shop.key}')" title="쇼핑몰 삭제">🗑</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          ${items||'<div class="empty-state">항목이 없어요</div>'}
+          <button class="add-btn" onclick="addItem('${shop.key}')" style="border-color:var(--shop-border); color:var(--shop-text);">+ 항목 추가</button>
+        </div>
+      </div>`;
+    }
+  }).join('');
+
+  document.getElementById('mainGrid').innerHTML = fridgePanel + shopPanels;
+
+  // 커스텀 패널 상단 accent 선 주입
+  document.querySelectorAll('.panel[style*="--shop-accent"]').forEach(el => {
+    const accent = getComputedStyle(el).getPropertyValue('--shop-accent').trim();
+    el.style.borderTop = `3px solid ${accent}`;
   });
 
-  document.getElementById('mainGrid').innerHTML = html;
   renderSummary();
 }
 
@@ -261,65 +405,171 @@ function renderSummary(){
   if(!state) return;
   const shops = state._shops || [];
 
-  // 1. 쇼핑몰 개수에 맞춰 상단 summary-bar 열(Column) 개수도 오른쪽으로 자동 확장
+  // ✨ 상단 요약 배너도 그리드 설정으로 가로 확장
   const summaryBarEl = document.getElementById('summaryBar');
   if (summaryBarEl) {
     summaryBarEl.style.gridTemplateColumns = `repeat(${shops.length + 1}, minmax(0, 1fr))`;
   }
 
-  // 냉장고 요약 카드
-  let html = `<div class="summary-card fridge">
-    <div class="summary-label">🧊 냉장고 재고</div>
-    <div class="summary-value">${(state.fridge||[]).length}<span style="font-size:14px;font-weight:400;color:var(--text2);margin-left:4px">품목</span></div>
-    <div class="summary-sub">현재 보관 중인 식재료</div>
-  </div>`;
-
-  // 각 쇼핑몰별 합계 요약 카드 생성 (자동 색상 반영)
-  let totals = {};
-  shops.forEach(s => {
-    const t = (state[s.key]||[]).reduce((sum, i) => sum + (i.price||0)*(i.qty||1), 0);
-    totals[s.key] = t;
-    const c = getShopColors(s.key);
-
-    html += `<div class="summary-card ${s.key}" style="border-color: ${c.border}; background-color: #ffffff;">
-      <div class="summary-card-decor" style="position:absolute; top:0; left:0; right:0; height:4px; background:${c.accent};"></div>
-      <div class="summary-label" style="color: ${c.text};">${s.icon||'🛍'} ${s.name} 합계</div>
-      <div class="summary-value">${fmt(t)}<span style="font-size:14px;font-weight:400;color:var(--text2);margin-left:4px">원</span></div>
-      <div class="summary-sub">${(state[s.key]||[]).length}개 품목</div>
+  // 냉장고
+  const fridgeCard = `
+    <div class="summary-card fridge">
+      <div class="summary-label">🧊 냉장고 재고</div>
+      <div class="summary-value">${(state.fridge||[]).length}<span style="font-size:14px;font-weight:400;color:var(--text2);margin-left:4px">품목</span></div>
+      <div class="summary-sub">현재 보관 중인 식재료</div>
     </div>`;
-  });
 
-  document.getElementById('summaryBar').innerHTML = html;
+  const shopCards = shops.map((shop) => {
+    const total = (state[shop.key]||[]).reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+    const fixedCls = FIXED_CLASSES[shop.key];
+    if (fixedCls) {
+      return `<div class="summary-card ${fixedCls}">
+        <div class="summary-label">${shop.icon} ${esc(shop.name)}</div>
+        <div class="summary-value">${fmt(total)}<span style="font-size:14px;font-weight:400;color:var(--text2);margin-left:4px">원</span></div>
+        <div class="summary-sub">${(state[shop.key]||[]).length}개 품목</div>
+      </div>`;
+    } else {
+      const c = getShopColor(shop.key);
+      return `<div class="summary-card" style="--shop-accent:${c.accent}; border-color:${c.border}; background-color:#ffffff;">
+        <div class="summary-label" style="color:${c.text};">${shop.icon} ${esc(shop.name)}</div>
+        <div class="summary-value">${fmt(total)}<span style="font-size:14px;font-weight:400;color:var(--text2);margin-left:4px">원</span></div>
+        <div class="summary-sub">${(state[shop.key]||[]).length}개 품목</div>
+      </div>`;
+    }
+  }).join('');
+
+  // 가장 저렴한 쇼핑몰 계산 (가격 비교 기능 복원)
+  let cheapestHtml = '';
+  if(shops.length >= 2){
+    const totals = shops.map(s=>({ name:s.name, total:(state[s.key]||[]).reduce((a,i)=>a+(i.price||0)*(i.qty||1),0) }))
+      .filter(s=>s.total>0);
+    if(totals.length >= 2){
+      totals.sort((a,b)=>a.total-b.total);
+      const diff = totals[1].total - totals[0].total;
+      cheapestHtml = `<div style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--success,#1E8A4C);font-weight:600;padding:8px 0;background:#E8F5E9;border-radius:6px;margin-top:8px;">
+        💡 ${esc(totals[0].name)}이(가) 다른 곳보다 ${fmt(diff)}원 더 저렴해요!
+      </div>`;
+    }
+  }
+
+  document.getElementById('summaryBar').innerHTML = fridgeCard + shopCards + cheapestHtml;
+  
+  // 커스텀 summary-card 상단 accent 선 주입
+  document.querySelectorAll('#summaryBar .summary-card[style*="--shop-accent"]').forEach(el => {
+    const accent = getComputedStyle(el).getPropertyValue('--shop-accent').trim();
+    el.style.borderTop = `3px solid ${accent}`;
+  });
 }
 
+// ── 쇼핑몰 추가/삭제 (모달 기능 유지) ─────────────────────
+window.openAddShopModal = () => {
+  document.getElementById('newShopName').value  = '';
+  document.getElementById('newShopIcon').value  = '';
+  document.getElementById('newShopBadge').value = '';
+
+  const existingKeys = (state._shops||[]).map(s=>s.key);
+  document.getElementById('presetList').innerHTML = SHOP_PRESETS.map(p=>`
+    <button class="preset-chip" onclick="fillPreset('${p.key}')"
+      style="${existingKeys.includes(p.key)?'opacity:0.35;pointer-events:none;':''}"
+    >${p.icon} ${p.name}</button>
+  `).join('');
+
+  document.getElementById('modalOverlay').style.display = 'flex';
+  setTimeout(()=>document.getElementById('newShopName').focus(), 100);
+};
+
+window.closeAddShopModal = (e) => {
+  if(e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').style.display = 'none';
+};
+
+window.fillPreset = (key) => {
+  const p = SHOP_PRESETS.find(x=>x.key===key);
+  if(!p) return;
+  document.getElementById('newShopName').value  = p.name;
+  document.getElementById('newShopIcon').value  = p.icon;
+  document.getElementById('newShopBadge').value = p.badge;
+};
+
+window.addShop = () => {
+  const name  = document.getElementById('newShopName').value.trim();
+  const icon  = document.getElementById('newShopIcon').value.trim()  || '🛒';
+  const badge = document.getElementById('newShopBadge').value.trim() || name;
+  if(!name){ showToast('쇼핑몰 이름을 입력해주세요'); return; }
+
+  const preset = SHOP_PRESETS.find(p=>p.name===name);
+  const key = preset ? preset.key : slugify(name);
+
+  if((state._shops||[]).find(s=>s.key===key)){
+    showToast('이미 추가된 쇼핑몰이에요'); return;
+  }
+
+  if(!state._shops) state._shops = [];
+  state._shops.push({ key, name, icon, badge });
+  if(!state[key]) state[key] = [];
+
+  document.getElementById('modalOverlay').style.display = 'none';
+  render();
+  scheduleSave();
+  showToast(`${icon} ${name} 추가됐어요!`);
+};
+
+window.removeShop = (key) => {
+  const shop = (state._shops||[]).find(s=>s.key===key);
+  if(!shop) return;
+  if(!confirm(`'${shop.name}' 패널을 삭제할까요?\n항목 데이터도 함께 삭제됩니다.`)) return;
+  state._shops = state._shops.filter(s=>s.key!==key);
+  delete state[key];
+  render();
+  scheduleSave();
+  showToast(`${shop.name} 삭제됐어요`);
+};
+
+// ── 아이템 CRUD ───────────────────────────────────────────
 window.updateField=(panel,id,field,val)=>{
   const item=(state[panel]||[]).find(i=>i.id===id);
   if(!item) return;
   if(field==='price'||field==='qty') item[field]=parseFloat(val)||0;
   else item[field]=val;
+  item.confirmed = false;
   renderSummary(); scheduleSave();
   if(field==='price'||field==='qty'){
     const el=document.querySelector(`[data-id="${id}"] .item-total`);
     const total=(item.price||0)*(item.qty||1);
-    if(el) el.textContent=fmt(total)+'원'; else render();
+    if(el) el.textContent=fmt(total)+'원';
   }
+  const checkBtn=document.getElementById(`check-btn-${panel}-${id}`);
+  if(checkBtn) checkBtn.style.display='';
 };
-window.delItem=(panel,id)=>{ state[panel]=(state[panel]||[]).filter(i=>i.id!==id); render(); scheduleSave(); };
+
+window.confirmItem=(panel,id)=>{
+  if(document.activeElement) document.activeElement.blur();
+  const item=(state[panel]||[]).find(i=>i.id===id);
+  if(item){ item.confirmed=true; scheduleSave(); }
+  const checkBtn=document.getElementById(`check-btn-${panel}-${id}`);
+  if(checkBtn) checkBtn.style.display='none';
+  showToast('✅ 등록이 완료되었습니다');
+};
+
+window.delItem=(panel,id)=>{
+  state[panel]=(state[panel]||[]).filter(i=>i.id!==id);
+  render(); scheduleSave();
+};
+
 window.addItem=panel=>{
-  if(!state[panel]) state[panel]=[];
   const id=Date.now();
-  if(panel==='fridge') state.fridge.push({id,name:'새 품목'});
-  else state[panel].push({id,name:'새 품목',price:0,qty:1,weight:''});
+  if(!state[panel]) state[panel]=[];
+  if(panel==='fridge') state.fridge.push({id,name:''});
+  else state[panel].push({id,name:'',price:0,qty:1,weight:''});
   render(); scheduleSave();
   setTimeout(()=>{ const inp=document.querySelectorAll(`[data-id="${id}"] .name-input`); if(inp.length){inp[0].focus();inp[0].select();} },60);
 };
 
-// 확장 프로그램 동기화
-window.__syncFromExtension = (products) => {
-  if(!state || !currentUser) { showToast('로그인 후 동기화할 수 있어요'); return; }
-  let addedCount=0; let updatedCount=0;
-  
-  products.forEach(p => {
+// ── 확장 프로그램 동기화 브릿지 ──────────────────────────
+window.__syncFromExtension=(products)=>{
+  if(!state||!currentUser){ showToast('로그인 후 동기화할 수 있어요'); return; }
+  let addedCount=0, updatedCount=0;
+  products.forEach(p=>{
     const panel=p.source==='kurly'?'kurly':'coupang';
     if(!state[panel]) state[panel]=[];
     const existing=state[panel].find(i=>i.name===p.name);
@@ -342,18 +592,16 @@ window.addEventListener('message',(e)=>{
   if(e.data&&e.data.type==='SYNC_PRODUCTS') window.__syncFromExtension(e.data.products);
 });
 
-// 복사
+// ── 복사 ─────────────────────────────────────────────────
 window.copyText=()=>{
   if(!state) return;
   const shops=state._shops||[];
   const lines=['📋 장보기 가격 비교표','─'.repeat(30),'','🧊 냉장고 재고',
     ...(state.fridge||[]).map(i=>`  • ${i.name}`),''];
   shops.forEach(s=>{
-    const total=(state[s.key]||[]).reduce((sum,i)=>sum+(i.price||0)*(i.qty||1),0);
-    lines.push(`${s.icon||'🛍'} ${s.name} (합계: ${fmt(total)}원)`);
-    (state[s.key]||[]).forEach(i=>{
-      lines.push(`  • ${i.name} | ${fmt(i.price)}원 × ${i.qty}개${i.weight?' | '+i.weight:''} → ${fmt((i.price||0)*(i.qty||1))}원`);
-    });
+    const total=(state[s.key]||[]).reduce((a,i)=>a+(i.price||0)*(i.qty||1),0);
+    lines.push(`${s.icon} ${s.name} (합계: ${fmt(total)}원)`);
+    (state[s.key]||[]).forEach(i=>lines.push(`  • ${i.name} | ${fmt(i.price)}원 × ${i.qty}개${i.weight?' | '+i.weight:''} → ${fmt((i.price||0)*(i.qty||1))}원`));
     lines.push('');
   });
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('클립보드에 복사됐어요!')).catch(()=>showToast('복사 실패'));
