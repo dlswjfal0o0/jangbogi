@@ -160,10 +160,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .empty-state {text-align:center;padding:32px 0;color:var(--text3);font-size:14px;font-weight:500;}
 
 /* 항목 추가 버튼 */
-.add-btn {width:100%;margin-top:12px;padding:12px;background:rgba(255,255,255,0.7);border:1px dashed var(--border2);border-radius:8px;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;}
-.add-btn:hover {border-color:var(--text);color:var(--text);background:var(--surface);}
-.panel.custom-shop .add-btn { background: rgba(255,255,255,0.8); border-color: var(--shop-border); color: var(--shop-text); }
-.panel.custom-shop .add-btn:hover { border-color: var(--shop-text); background: var(--shop-bg); }
+/* 기본 추가 버튼 스타일 (모든 패널 공통) */
+.add-btn {
+  width: 100%; margin-top: 12px; padding: 12px;
+  background: rgba(255,255,255,0.7);
+  border: 1px dashed var(--border2); /* 기본 쿠팡/컬리용 테두리 */
+  border-radius: 8px; color: var(--text2);
+  font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s;
+}
+.add-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface); }
+
+/* 커스텀 쇼핑몰용 테두리 자동 연동 */
+.panel.custom-shop .add-btn {
+  border: 1px dashed var(--shop-border); /* 변수로 두께와 색상 제어 */
+  color: var(--shop-text);
+}
+.panel.custom-shop .add-btn:hover {
+  border-color: var(--shop-text);
+  background: var(--shop-bg);
+}
 
 .toast {position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,25,22,0.9);color:white;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);z-index:999;pointer-events:none;box-shadow:var(--shadow-md);}
 .toast.show {opacity:1;transform:translateX(-50%) translateY(0);}
