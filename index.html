@@ -279,6 +279,14 @@ function render(){
     const items = (state[shop.key]||[]).map(i=>renderShopItem(shop.key,i)).join('');
     const fixedCls = FIXED_CLASSES[shop.key];
 
+    // fixedCls가 없으면 무조건 custom-shop 클래스를 추가하여 CSS 디자인을 받도록 합니다.
+    const panelClass = fixedCls || 'custom-shop'; 
+
+    return `<div class="panel ${panelClass}" style="${!fixedCls ? `--shop-bg:${c.bg};--shop-border:${c.border};--shop-text:${c.text};--shop-accent:${c.accent};` : ''}">
+    ...
+  </div>`;
+});
+  
     if (fixedCls) {
       return `<div class="panel ${fixedCls}">
         <div class="panel-header">
