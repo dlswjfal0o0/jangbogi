@@ -213,3 +213,46 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   .summary-value{font-size:24px;}
   .fields{grid-template-columns:1fr 1fr;}
 }
+
+/* ─────────────────────────────────────────────────────────
+   ✨ 동적 쇼핑몰(새 쇼핑몰) 패턴 및 테마 자동 연동 디자인 ✨
+   ───────────────────────────────────────────────────────── */
+
+/* 1. 패널 배경에 장바구니 무늬 패턴 (쿠팡/컬리와 동일) */
+.panel.custom-shop {
+  background-color: #FFFFFF;
+  background-image: 
+    linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg)),
+    linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg));
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+/* 2. 요약 카드 배경 패턴 */
+.summary-card.custom-shop {
+  background-color: #ffffff;
+  background-image: radial-gradient(var(--shop-bg) 10%, transparent 11%), radial-gradient(var(--shop-bg) 10%, transparent 11%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* 3. 항목 추가 버튼 색상 연동 */
+.panel.custom-shop .add-btn {
+  background: rgba(255,255,255,0.7);
+  border: 1px dashed var(--shop-border);
+  color: var(--shop-text);
+}
+.panel.custom-shop .add-btn:hover {
+  border-color: var(--shop-text);
+  background: var(--shop-bg);
+}
+
+/* 4. 모바일 레이아웃 강제 수정 */
+@media(max-width:1024px){
+  .grid, .summary-bar { grid-template-columns: 1fr !important; }
+}
+
+@media(max-width:600px){
+  .logo span { display: none; }
+  .user-chip { display: none; }
+}
