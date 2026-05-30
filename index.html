@@ -78,68 +78,6 @@
 
 <div class="toast" id="toast"></div>
 
-<style>
-  /* 모달 */
-  #modalOverlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.35);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 500;
-    backdrop-filter: blur(2px);
-  }
-  .modal-card {
-    background: var(--surface, #fff);
-    border: 1px solid var(--border, #E2DFD6);
-    border-radius: 14px;
-    padding: 24px;
-    width: 340px;
-    max-width: 92vw;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    animation: fadeUp 0.2s ease;
-  }
-  .modal-title { font-size: 16px; font-weight: 700; color: var(--text,#1A1916); margin-bottom: 16px; }
-  .modal-body { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-  .modal-field { display: flex; flex-direction: column; gap: 4px; }
-  .modal-label { font-size: 12px; font-weight: 600; color: var(--text2,#6B6760); }
-  .modal-input {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px; color: var(--text,#1A1916);
-    background: var(--surface2,#F0EEE8);
-    border: 1px solid var(--border,#E2DFD6);
-    border-radius: 6px; padding: 8px 10px;
-    outline: none; transition: border-color 0.15s;
-  }
-  .modal-input:focus { border-color: var(--border2,#CBC7BC); background: #fff; }
-  .modal-preset-label { font-size: 11px; font-weight: 600; color: var(--text3,#A09D97); text-transform: uppercase; letter-spacing: 0.4px; }
-  .modal-presets { display: flex; flex-wrap: wrap; gap: 6px; }
-  .preset-chip {
-    font-size: 12px; padding: 5px 10px; border-radius: 20px;
-    border: 1px solid var(--border2,#CBC7BC);
-    background: var(--surface,#fff);
-    color: var(--text2,#6B6760);
-    cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; gap: 4px;
-  }
-  .preset-chip:hover { background: var(--surface2,#F0EEE8); color: var(--text,#1A1916); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .btn-primary { background: var(--text,#1A1916) !important; color: white !important; border-color: var(--text,#1A1916) !important; }
-  .btn-primary:hover { background: #333 !important; }
-
-  /* 커스텀 쇼핑몰 summary-card 상단 accent 선 */
-  .summary-card[style*="--shop-accent"]::before { background: var(--shop-accent) !important; }
-
-  /* 패널 삭제 버튼 */
-  .panel-del-btn {
-    background: none; border: none; cursor: pointer;
-    font-size: 13px; color: var(--text3,#A09D97);
-    padding: 3px 5px; border-radius: 4px;
-    transition: all 0.15s; line-height: 1;
-  }
-  .panel-del-btn:hover { color: #E03A3A; background: #FEE8E8; }
-
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-</style>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut }
@@ -161,7 +99,6 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ── 프리셋 쇼핑몰 목록 ───────────────────────────────────
 const SHOP_PRESETS = [
   { name:'마켓컬리',   icon:'🛍', badge:'Kurly',    key:'kurly'   },
   { name:'쿠팡',       icon:'📦', badge:'Coupang',  key:'coupang' },
@@ -173,7 +110,6 @@ const SHOP_PRESETS = [
   { name:'롯데마트',   icon:'🔴', badge:'Lotte',    key:'lotte'   },
 ];
 
-// ── 기본 데이터 구조 ─────────────────────────────────────
 const DEFAULT_DATA = {
   fridge:  [{id:1,name:'계란 (30구)'},{id:2,name:'우유 1L'},{id:3,name:'두부 300g'}],
   kurly:   [{id:1,name:'유기농 계란 (15구)',price:6800,qty:1,weight:''},{id:2,name:'서울우유 1L',price:2400,qty:2,weight:'1000g'}],
@@ -265,7 +201,6 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// ── 렌더 ─────────────────────────────────────────────────
 function renderFridgeItem(item){
   const checkStyle = item.confirmed ? 'display:none;' : '';
   return `<div class="item" data-id="${item.id}">
@@ -309,7 +244,6 @@ function renderShopItem(panel,item){
 
 const FIXED_CLASSES = { kurly: 'kurly', coupang: 'coupang' };
 
-// ✨ [방법 1] 글자를 기반으로 겹치지 않는 파스텔톤 색상을 무작위 생성하는 함수
 function getShopColor(key) {
   let hash = 0;
   for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
@@ -326,13 +260,9 @@ function render(){
   if(!state) return;
   const shops = state._shops || [];
 
-  // ✨ 가로로 자동 확장되도록 그리드 설정
-  const gridEl = document.getElementById('mainGrid');
-  if (gridEl) {
-    gridEl.style.gridTemplateColumns = `repeat(${shops.length + 1}, minmax(0, 1fr))`;
-  }
+  // ✨ 모바일 정렬 오류 해결: CSS 변수(--shop-count)로 개수를 전달하여 반응형(미디어쿼리)을 해치지 않음
+  document.documentElement.style.setProperty('--shop-count', shops.length + 1);
 
-  // 냉장고 패널
   const fridgeItems = (state.fridge||[]).map(i=>renderFridgeItem(i)).join('');
   const fridgePanel = `<div class="panel fridge">
     <div class="panel-header">
@@ -345,13 +275,11 @@ function render(){
     </div>
   </div>`;
 
-  // 쇼핑몰 패널들
   const shopPanels = shops.map((shop) => {
     const items = (state[shop.key]||[]).map(i=>renderShopItem(shop.key,i)).join('');
     const fixedCls = FIXED_CLASSES[shop.key];
 
     if (fixedCls) {
-      // 컬리·쿠팡: 기존 CSS 클래스 유지
       return `<div class="panel ${fixedCls}">
         <div class="panel-header">
           <div class="panel-title">
@@ -369,9 +297,9 @@ function render(){
         </div>
       </div>`;
     } else {
-      // 커스텀 쇼핑몰: CSS 변수와 [방법 1] 색상 자동 주입
       const c = getShopColor(shop.key);
-      return `<div class="panel" style="--shop-bg:${c.bg};--shop-border:${c.border};--shop-text:${c.text};--shop-accent:${c.accent}; border-color:var(--shop-border); background-color:var(--shop-bg);">
+      // ✨ 디자인 오류 해결: custom-shop 클래스를 부여하여 CSS와 완벽 연동
+      return `<div class="panel custom-shop" style="--shop-bg:${c.bg};--shop-border:${c.border};--shop-text:${c.text};--shop-accent:${c.accent};">
         <div class="panel-header" style="background: rgba(255,255,255,0.6); border-bottom: 1px solid var(--shop-border);">
           <div class="panel-title">
             <div class="panel-icon" style="background:var(--shop-bg)">${shop.icon}</div>
@@ -384,7 +312,7 @@ function render(){
         </div>
         <div class="panel-body">
           ${items||'<div class="empty-state">항목이 없어요</div>'}
-          <button class="add-btn" onclick="addItem('${shop.key}')" style="border-color:var(--shop-border); color:var(--shop-text);">+ 항목 추가</button>
+          <button class="add-btn" onclick="addItem('${shop.key}')">+ 항목 추가</button>
         </div>
       </div>`;
     }
@@ -392,7 +320,6 @@ function render(){
 
   document.getElementById('mainGrid').innerHTML = fridgePanel + shopPanels;
 
-  // 커스텀 패널 상단 accent 선 주입
   document.querySelectorAll('.panel[style*="--shop-accent"]').forEach(el => {
     const accent = getComputedStyle(el).getPropertyValue('--shop-accent').trim();
     el.style.borderTop = `3px solid ${accent}`;
@@ -405,13 +332,6 @@ function renderSummary(){
   if(!state) return;
   const shops = state._shops || [];
 
-  // ✨ 상단 요약 배너도 그리드 설정으로 가로 확장
-  const summaryBarEl = document.getElementById('summaryBar');
-  if (summaryBarEl) {
-    summaryBarEl.style.gridTemplateColumns = `repeat(${shops.length + 1}, minmax(0, 1fr))`;
-  }
-
-  // 냉장고
   const fridgeCard = `
     <div class="summary-card fridge">
       <div class="summary-label">🧊 냉장고 재고</div>
@@ -430,15 +350,15 @@ function renderSummary(){
       </div>`;
     } else {
       const c = getShopColor(shop.key);
-      return `<div class="summary-card" style="--shop-accent:${c.accent}; border-color:${c.border}; background-color:#ffffff;">
-        <div class="summary-label" style="color:${c.text};">${shop.icon} ${esc(shop.name)}</div>
+      return `<div class="summary-card custom-shop" style="--shop-bg:${c.bg};--shop-border:${c.border};--shop-text:${c.text};--shop-accent:${c.accent}; border-color:var(--shop-border);">
+        <div class="summary-card-decor" style="position:absolute; top:0; left:0; right:0; height:4px; background:var(--shop-accent);"></div>
+        <div class="summary-label" style="color:var(--shop-text);">${shop.icon} ${esc(shop.name)}</div>
         <div class="summary-value">${fmt(total)}<span style="font-size:14px;font-weight:400;color:var(--text2);margin-left:4px">원</span></div>
         <div class="summary-sub">${(state[shop.key]||[]).length}개 품목</div>
       </div>`;
     }
   }).join('');
 
-  // 가장 저렴한 쇼핑몰 계산 (가격 비교 기능 복원)
   let cheapestHtml = '';
   if(shops.length >= 2){
     const totals = shops.map(s=>({ name:s.name, total:(state[s.key]||[]).reduce((a,i)=>a+(i.price||0)*(i.qty||1),0) }))
@@ -453,15 +373,8 @@ function renderSummary(){
   }
 
   document.getElementById('summaryBar').innerHTML = fridgeCard + shopCards + cheapestHtml;
-  
-  // 커스텀 summary-card 상단 accent 선 주입
-  document.querySelectorAll('#summaryBar .summary-card[style*="--shop-accent"]').forEach(el => {
-    const accent = getComputedStyle(el).getPropertyValue('--shop-accent').trim();
-    el.style.borderTop = `3px solid ${accent}`;
-  });
 }
 
-// ── 쇼핑몰 추가/삭제 (모달 기능 유지) ─────────────────────
 window.openAddShopModal = () => {
   document.getElementById('newShopName').value  = '';
   document.getElementById('newShopIcon').value  = '';
@@ -525,7 +438,6 @@ window.removeShop = (key) => {
   showToast(`${shop.name} 삭제됐어요`);
 };
 
-// ── 아이템 CRUD ───────────────────────────────────────────
 window.updateField=(panel,id,field,val)=>{
   const item=(state[panel]||[]).find(i=>i.id===id);
   if(!item) return;
@@ -565,7 +477,6 @@ window.addItem=panel=>{
   setTimeout(()=>{ const inp=document.querySelectorAll(`[data-id="${id}"] .name-input`); if(inp.length){inp[0].focus();inp[0].select();} },60);
 };
 
-// ── 확장 프로그램 동기화 브릿지 ──────────────────────────
 window.__syncFromExtension=(products)=>{
   if(!state||!currentUser){ showToast('로그인 후 동기화할 수 있어요'); return; }
   let addedCount=0, updatedCount=0;
@@ -592,7 +503,6 @@ window.addEventListener('message',(e)=>{
   if(e.data&&e.data.type==='SYNC_PRODUCTS') window.__syncFromExtension(e.data.products);
 });
 
-// ── 복사 ─────────────────────────────────────────────────
 window.copyText=()=>{
   if(!state) return;
   const shops=state._shops||[];
