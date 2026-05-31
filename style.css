@@ -208,6 +208,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 /* ─────────────────────────────────────────────────────────
    ✨ 모바일 및 태블릿 레이아웃 강제 교정 (!important 적용) ✨
    ───────────────────────────────────────────────────────── */
+/* ✨ 모바일 및 태블릿 레이아웃 강제 교정 (!important 적용) ✨ */
 @media(max-width:1024px){
   .grid, .summary-bar { grid-template-columns: 1fr !important; }
   .grid { gap: 16px; }
@@ -216,23 +217,44 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
 @media(max-width:600px){
   .main { padding: 1rem; }
-  .header { padding: 0 8px !important; } 
-  .header-right { gap: 4px !important; }
   
-  /* 1. 로고 '비교표' 글씨 무조건 보이게 강제 설정 */
-  .logo { font-size: 15px !important; }
+  /* 1. 헤더가 좁으면 자동으로 높이를 늘리고 항목들을 밑으로 내림 (핵심) */
+  .header { 
+    height: auto !important; 
+    min-height: 64px !important; 
+    padding: 10px 12px !important; 
+    flex-wrap: wrap !important; 
+    gap: 10px !important; 
+  }
+  
+  /* 버튼 그룹도 자리가 부족하면 자연스럽게 정렬됨 */
+  .header-right { 
+    flex-wrap: wrap !important; 
+    justify-content: flex-end !important; 
+    gap: 6px !important; 
+  }
+  
+  /* 2. 로고 '비교표' 글씨 선명하게 유지 */
+  .logo { font-size: 16px !important; }
   .logo span { display: inline !important; color: var(--kurly-accent); } 
   
-  /* 2. 사용자 계정 이름 무조건 보이게 강제 설정 */
+  /* 3. 사용자 계정 이름 유지 (너무 길면 ...으로 자동 생략) */
   .user-chip { display: flex !important; padding: 4px 8px !important; gap: 4px !important; }
   .user-name { 
     display: block !important; 
-    max-width: 50px !important; /* 이름이 길어도 옆 버튼들을 밀어내지 않게 제한 */
-    font-size: 11px !important;
+    max-width: 70px !important; 
+    font-size: 12px !important; 
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   } 
   
-  /* 3. 모바일에서 버튼 크기 다이어트 */
-  .header-right .btn { padding: 6px 6px !important; font-size: 11px !important; letter-spacing: -0.5px !important; }
+  /* 4. 버튼 크기 최적화 */
+  .header-right .btn { 
+    padding: 6px 10px !important; 
+    font-size: 12px !important; 
+    letter-spacing: -0.5px !important; 
+  }
   
   .summary-value { font-size: 20px; }
   .fields { grid-template-columns: 1fr 1fr; }
