@@ -266,22 +266,27 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   background: var(--shop-bg);
 }
 
-/* [모바일 헤더 최적화] */
+/* 모바일 화면 설정 */
 @media(max-width:600px){
-  .main{padding:1rem;}
-  .header{padding:0 10px;}
-  .header-right{gap:6px;}
+  .main { padding: 1rem; }
+  .header { padding: 0 8px; } /* 좌우 여백을 최소화하여 공간 확보 */
+  .header-right { gap: 4px; }
   
-  /* 로고 글씨 숨김 */
-  .logo span { display: none; }
+  /* 1. 로고 '비교표' 글씨 다시 보이게 하기 */
+  .logo { font-size: 14px; letter-spacing: -0.5px; } /* 글씨를 살짝 줄여서 공간 확보 */
+  .logo span { display: inline; } /* 숨김 해제! */
   
-  /* 👈 핵심 수정: 칩 전체를 숨기지 않고 이름만 숨김 */
+  /* 2. 사용자 계정 이름 다시 보이게 하기 */
   .user-chip { padding: 4px 8px; gap: 4px; }
-  .user-name { display: none; } 
+  .user-name { 
+    display: block; /* 숨김 해제! */
+    max-width: 60px; /* 이름이 길면 ...으로 생략되도록 너비 제한 */
+    font-size: 11px;
+  } 
   
-  /* 모바일 전용 버튼 크기 축소 */
-  .header-right .btn { padding: 6px 8px; font-size: 11px; letter-spacing: -0.5px; }
+  /* 버튼들이 차지하는 공간 최소화 */
+  .header-right .btn { padding: 6px 6px; font-size: 11px; letter-spacing: -0.5px; }
   
-  .summary-value{font-size:24px;}
-  .fields{grid-template-columns:1fr 1fr;}
+  .summary-value { font-size: 20px; }
+  .fields { grid-template-columns: 1fr 1fr; }
 }
