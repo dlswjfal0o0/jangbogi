@@ -237,6 +237,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 /* 1. 패널 배경에 장바구니 무늬 패턴 (쿠팡/컬리와 동일) */
 .panel.custom-shop {
   background-color: #FFFFFF;
+  border: 1px solid var(--shop-border) !important; /* 👈 이 줄을 꼭 추가해 주세요! */
   background-image: 
     linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg)),
     linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg));
@@ -269,16 +270,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 @media(max-width:600px){
   .main{padding:1rem;}
   .header{padding:0 10px;}
+  .header-right{gap:6px;}
   
-  /* 로고와 사용자 칩 유지 (이름만 숨김) */
-  .logo span { display: inline; } 
-  .user-chip { padding: 4px 8px; }
+  /* 로고 글씨 숨김 */
+  .logo span { display: none; }
+  
+  /* 👈 핵심 수정: 칩 전체를 숨기지 않고 이름만 숨김 */
+  .user-chip { padding: 4px 8px; gap: 4px; }
   .user-name { display: none; } 
   
-  /* 헤더 버튼 간격 조정 */
-  .header-right { gap: 4px; }
-  .btn { padding: 6px 8px; font-size: 11px; }
+  /* 모바일 전용 버튼 크기 축소 */
+  .header-right .btn { padding: 6px 8px; font-size: 11px; letter-spacing: -0.5px; }
   
-  .summary-value{font-size:20px;}
+  .summary-value{font-size:24px;}
   .fields{grid-template-columns:1fr 1fr;}
 }
