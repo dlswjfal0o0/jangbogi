@@ -17,7 +17,6 @@
   --shadow: 0 2px 6px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
   --shadow-md: 0 8px 24px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
   
-  /* 동적 그리드 변수 (기본값 3) */
   --shop-count: 3;
 }
 
@@ -68,18 +67,17 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .btn-danger{border-color:#FBCFCF;color:var(--danger);}
 .btn-danger:hover{background:#FEF2F2;}
 
-/* Grid Layout (JS의 CSS 변수를 받음) */
+/* Grid Layout */
 .main{padding:2rem;max-width:1400px;margin:0 auto;}
 .summary-bar{display:grid;grid-template-columns:repeat(var(--shop-count), 1fr);gap:16px;margin-bottom:2rem;}
 .grid{display:grid;grid-template-columns:repeat(var(--shop-count), minmax(0,1fr));gap:20px;align-items:start;}
 
-/* 🧊 상단 요약 카드 */
+/* 상단 요약 카드 */
 .summary-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
 .summary-card.fridge { background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%); border-color: var(--fridge-border); }
 .summary-card.kurly { background-color: #ffffff; border-color: var(--kurly-border); background-image: radial-gradient(var(--kurly-bg) 10%, transparent 11%), radial-gradient(var(--kurly-bg) 10%, transparent 11%); background-size: 20px 20px; background-position: 0 0, 10px 10px; }
 .summary-card.coupang { background-color: #ffffff; border-color: var(--coupang-border); background-image: radial-gradient(var(--coupang-bg) 10%, transparent 11%), radial-gradient(var(--coupang-bg) 10%, transparent 11%); background-size: 20px 20px; background-position: 0 0, 10px 10px; }
 
-/* 🛒 커스텀 쇼핑몰 요약 카드 (패턴 적용) */
 .summary-card.custom-shop {
   background-color: #ffffff;
   background-image: radial-gradient(var(--shop-bg) 10%, transparent 11%), radial-gradient(var(--shop-bg) 10%, transparent 11%);
@@ -111,9 +109,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   background-size: 16px 16px; background-position: 0 0, 8px 8px;
 }
 
-/* 🛒 커스텀 쇼핑몰 패널 (장바구니 직조 패턴 연동) */
+/* ✨ 새 쇼핑몰 패널 테두리 강제 고정 (!important) */
 .panel.custom-shop {
   background-color: #FFFFFF;
+  border: 1px solid var(--shop-border) !important; 
   background-image: 
     linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg)),
     linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg));
@@ -147,7 +146,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .field-input {font-family:'DM Mono',monospace;font-size:13px;color:var(--text);background:var(--surface2);border:1px solid transparent;border-radius:var(--radius-sm);padding:6px 8px;width:100%;transition:all 0.2s;}
 .field-input:focus {outline:none;border-color:var(--border2);background:var(--surface);box-shadow:0 0 0 2px rgba(0,0,0,0.05);}
 
-/* 아이템 가격 배지 */
 .item-total {font-family:'DM Mono',monospace;font-size:13px;font-weight:600;border-radius:var(--radius-sm);padding:4px 10px;white-space:nowrap;flex-shrink:0;align-self:flex-end;margin-bottom:4px;}
 .panel.kurly .item-total {color:var(--kurly-accent);background:var(--kurly-bg);}
 .panel.coupang .item-total {color:var(--coupang-text);background:var(--coupang-bg);}
@@ -156,35 +154,36 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
 .del-btn {background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all 0.2s;flex-shrink:0;margin-top:2px;}
 .del-btn:hover {color:var(--danger);background:#FEE8E8;}
-
 .empty-state {text-align:center;padding:32px 0;color:var(--text3);font-size:14px;font-weight:500;}
 
-/* 항목 추가 버튼 */
-/* 기본 추가 버튼 스타일 (모든 패널 공통) */
+/* ─────────────────────────────────────────────────────────
+   ✨ '항목 추가' 버튼 디자인 고정 (!important 적용) ✨
+   ───────────────────────────────────────────────────────── */
+/* 기본 컬리/쿠팡 버튼 */
 .add-btn {
-  width: 100%; margin-top: 12px; padding: 12px;
-  background: rgba(255,255,255,0.7);
-  border: 1px dashed var(--border2); /* 기본 쿠팡/컬리용 테두리 */
-  border-radius: 8px; color: var(--text2);
+  width:100%; margin-top:12px; padding:12px;
+  background:rgba(255,255,255,0.7);
+  border: 1px dashed var(--border2); 
+  border-radius:8px; color:var(--text2);
   font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:600;
   cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s;
 }
-.add-btn:hover { border-color: var(--text); color: var(--text); background: var(--surface); }
+.add-btn:hover {border-color:var(--text); color:var(--text); background:var(--surface);}
 
-/* 커스텀 쇼핑몰용 테두리 자동 연동 */
-.panel.custom-shop .add-btn {
-  border: 1px dashed var(--shop-border); /* 변수로 두께와 색상 제어 */
-  color: var(--shop-text);
+/* 새 쇼핑몰 전용 버튼 */
+.panel.custom-shop .add-btn { 
+  background: rgba(255,255,255,0.7) !important; 
+  border: 1px dashed var(--shop-border) !important; /* 두께, 점선 강제 고정 */
+  color: var(--shop-text) !important; 
 }
-.panel.custom-shop .add-btn:hover {
-  border-color: var(--shop-text);
-  background: var(--shop-bg);
+.panel.custom-shop .add-btn:hover { 
+  border-color: var(--shop-text) !important; 
+  background: var(--shop-bg) !important; 
 }
 
+/* 모달 & 토스트 */
 .toast {position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,25,22,0.9);color:white;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);z-index:999;pointer-events:none;box-shadow:var(--shadow-md);}
 .toast.show {opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* 모달 디자인 */
 #modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 500; backdrop-filter: blur(2px); }
 .modal-card { background: var(--surface, #fff); border: 1px solid var(--border, #E2DFD6); border-radius: 14px; padding: 24px; width: 340px; max-width: 92vw; box-shadow: 0 8px 32px rgba(0,0,0,0.12); animation: fadeUp 0.2s ease; }
 .modal-title { font-size: 16px; font-weight: 700; color: var(--text,#1A1916); margin-bottom: 16px; }
@@ -206,86 +205,34 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-/* ✨ 모바일 및 태블릿 반응형 완벽 처리 ✨ */
+/* ─────────────────────────────────────────────────────────
+   ✨ 모바일 및 태블릿 레이아웃 강제 교정 (!important 적용) ✨
+   ───────────────────────────────────────────────────────── */
 @media(max-width:1024px){
-  /* 태블릿/모바일에서는 가로 나열 대신 위아래로 배치 (!important로 강제 적용) */
   .grid, .summary-bar { grid-template-columns: 1fr !important; }
   .grid { gap: 16px; }
   .summary-bar { gap: 12px; }
 }
 
 @media(max-width:600px){
-  .main{padding:1rem;}
-  /* 헤더 공간 확보 */
-  .header{padding:0 10px;}
-  .header-right{gap:6px;}
-  /* 모바일에서 글씨가 길어서 깨지지 않도록 로고 글자 일부 숨김 */
-  .logo span { display: none; }
-  /* 공간을 많이 차지하는 사용자 칩을 숨기고 버튼만 표시 */
-  .user-chip { display: none; } 
-  /* 모바일 전용 버튼 크기 축소 */
-  .header-right .btn { padding: 6px 8px; font-size: 11px; letter-spacing: -0.5px; }
-  
-  .summary-value{font-size:24px;}
-  .fields{grid-template-columns:1fr 1fr;}
-}
-
-/* ─────────────────────────────────────────────────────────
-   ✨ 동적 쇼핑몰(새 쇼핑몰) 패턴 및 테마 자동 연동 디자인 ✨
-   ───────────────────────────────────────────────────────── */
-
-/* 1. 패널 배경에 장바구니 무늬 패턴 (쿠팡/컬리와 동일) */
-.panel.custom-shop {
-  background-color: #FFFFFF;
-  border: 1px solid var(--shop-border) !important; /* 👈 이 줄을 꼭 추가해 주세요! */
-  background-image: 
-    linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg)),
-    linear-gradient(45deg, var(--shop-bg) 25%, transparent 25%, transparent 75%, var(--shop-bg) 75%, var(--shop-bg));
-  background-size: 16px 16px;
-  background-position: 0 0, 8px 8px;
-}
-
-/* 2. 요약 카드 배경 패턴 */
-.summary-card.custom-shop {
-  background-color: #ffffff;
-  background-image: radial-gradient(var(--shop-bg) 10%, transparent 11%), radial-gradient(var(--shop-bg) 10%, transparent 11%);
-  background-size: 20px 20px;
-  background-position: 0 0, 10px 10px;
-}
-
-/* [디자인 통일] 기존 쿠팡/컬리와 완전히 동일한 테두리/버튼 디자인 적용 */
-.panel.custom-shop .add-btn {
-  background: rgba(255,255,255,0.7);
-  border: 1px dashed var(--shop-border); /* 기존과 동일한 dashed 스타일 */
-  color: var(--shop-text);
-  padding: 12px;
-  width: 100%;
-}
-.panel.custom-shop .add-btn:hover {
-  border-color: var(--shop-text);
-  background: var(--shop-bg);
-}
-
-/* 모바일 화면 설정 */
-@media(max-width:600px){
   .main { padding: 1rem; }
-  .header { padding: 0 8px; } /* 좌우 여백을 최소화하여 공간 확보 */
-  .header-right { gap: 4px; }
+  .header { padding: 0 8px !important; } 
+  .header-right { gap: 4px !important; }
   
-  /* 1. 로고 '비교표' 글씨 다시 보이게 하기 */
-  .logo { font-size: 14px; letter-spacing: -0.5px; } /* 글씨를 살짝 줄여서 공간 확보 */
-  .logo span { display: inline; } /* 숨김 해제! */
+  /* 1. 로고 '비교표' 글씨 무조건 보이게 강제 설정 */
+  .logo { font-size: 15px !important; }
+  .logo span { display: inline !important; color: var(--kurly-accent); } 
   
-  /* 2. 사용자 계정 이름 다시 보이게 하기 */
-  .user-chip { padding: 4px 8px; gap: 4px; }
+  /* 2. 사용자 계정 이름 무조건 보이게 강제 설정 */
+  .user-chip { display: flex !important; padding: 4px 8px !important; gap: 4px !important; }
   .user-name { 
-    display: block; /* 숨김 해제! */
-    max-width: 60px; /* 이름이 길면 ...으로 생략되도록 너비 제한 */
-    font-size: 11px;
+    display: block !important; 
+    max-width: 50px !important; /* 이름이 길어도 옆 버튼들을 밀어내지 않게 제한 */
+    font-size: 11px !important;
   } 
   
-  /* 버튼들이 차지하는 공간 최소화 */
-  .header-right .btn { padding: 6px 6px; font-size: 11px; letter-spacing: -0.5px; }
+  /* 3. 모바일에서 버튼 크기 다이어트 */
+  .header-right .btn { padding: 6px 6px !important; font-size: 11px !important; letter-spacing: -0.5px !important; }
   
   .summary-value { font-size: 20px; }
   .fields { grid-template-columns: 1fr 1fr; }
